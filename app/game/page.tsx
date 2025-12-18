@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import GameBoard, { Card, Player } from "@/components/game/GameBoard";
 
 const GameDemo = () => {
+	const [playerCount, setPlayerCount] = useState<number>(4);
+
 	// Sample deck of cards
 	const createDeck = (): Card[] => {
 		const suits: ("hearts" | "diamonds" | "clubs" | "spades")[] = ["hearts", "diamonds", "clubs", "spades"];
@@ -39,31 +41,39 @@ const GameDemo = () => {
 		return shuffled;
 	};
 
+	// Function to create players dynamically
+	const createPlayers = (count: number, deck: Card[]): Player[] => {
+		const playerNames = [
+			"You", "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace"
+		];
+
+		const cardsPerPlayer = 5;
+		const players: Player[] = [];
+
+		for (let i = 0; i < count; i++) {
+			const startIndex = i * cardsPerPlayer;
+			const endIndex = startIndex + cardsPerPlayer;
+
+			players.push({
+				id: `player-${i + 1}`,
+				name: playerNames[i],
+				cards: deck.slice(startIndex, endIndex).map(card => ({
+					...card,
+					faceDown: i !== 0 // Only show first player's cards face up
+				})),
+				score: 0,
+			});
+		}
+
+		return players;
+	};
+
 	const shuffledDeck = shuffleArray(initialDeck);
 
 	// Deal cards to players
-	const [players, setPlayers] = useState<Player[]>([
-		{
-			id: "player-1",
-			name: "You",
-			cards: shuffledDeck.slice(0, 5).map(card => ({ ...card, faceDown: false })),
-			score: 0,
-		},
-		{
-			id: "player-2",
-			name: "Alice",
-			cards: shuffledDeck.slice(5, 10).map(card => ({ ...card, faceDown: true })),
-			score: 0,
-		},
-		{
-			id: "player-3",
-			name: "Bob",
-			cards: shuffledDeck.slice(10, 15).map(card => ({ ...card, faceDown: true })),
-			score: 0,
-		},
-	]);
+	const [players, setPlayers] = useState<Player[]>(createPlayers(playerCount, shuffledDeck));
 
-	const [deck, setDeck] = useState<Card[]>(shuffledDeck.slice(15));
+	const [deck, setDeck] = useState<Card[]>(shuffledDeck.slice(playerCount * 5));
 	const [communityCards, setCommunityCards] = useState<Card[]>([]);
 	const [currentPlayerId, setCurrentPlayerId] = useState<string>("player-1");
 
@@ -122,29 +132,21 @@ const GameDemo = () => {
 
 	const resetGame = () => {
 		const newShuffledDeck = shuffleArray(createDeck());
-		const newPlayers = [
-			{
-				id: "player-1",
-				name: "You",
-				cards: newShuffledDeck.slice(0, 5).map(card => ({ ...card, faceDown: false })),
-				score: 0,
-			},
-			{
-				id: "player-2",
-				name: "Alice",
-				cards: newShuffledDeck.slice(5, 10).map(card => ({ ...card, faceDown: true })),
-				score: 0,
-			},
-			{
-				id: "player-3",
-				name: "Bob",
-				cards: newShuffledDeck.slice(10, 15).map(card => ({ ...card, faceDown: true })),
-				score: 0,
-			},
-		];
+		const newPlayers = createPlayers(playerCount, newShuffledDeck);
 
 		setPlayers(newPlayers);
-		setDeck(newShuffledDeck.slice(15));
+		setDeck(newShuffledDeck.slice(playerCount * 5));
+		setCommunityCards([]);
+		setCurrentPlayerId("player-1");
+	};
+
+	const handlePlayerCountChange = (newCount: number) => {
+		setPlayerCount(newCount);
+		const newShuffledDeck = shuffleArray(createDeck());
+		const newPlayers = createPlayers(newCount, newShuffledDeck);
+
+		setPlayers(newPlayers);
+		setDeck(newShuffledDeck.slice(newCount * 5));
 		setCommunityCards([]);
 		setCurrentPlayerId("player-1");
 	};
@@ -167,7 +169,25 @@ const GameDemo = () => {
 					<h3 className="text-sm font-semibold text-black dark:text-zinc-50 mb-3">
 						Controls
 					</h3>
-					<div className="space-y-2">
+					<div className="space-y-3">
+						<div>
+							<label className="block text-xs font-medium text-black dark:text-zinc-50 mb-1">
+								Players: {playerCount}
+							</label>
+							<select
+								value={playerCount}
+								onChange={(e) => handlePlayerCountChange(Number(e.target.value))}
+								className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-black dark:text-zinc-50">
+								<option value={1}>1 Player</option>
+								<option value={2}>2 Players</option>
+								<option value={3}>3 Players</option>
+								<option value={4}>4 Players</option>
+								<option value={5}>5 Players</option>
+								<option value={6}>6 Players</option>
+								<option value={7}>7 Players</option>
+								<option value={8}>8 Players</option>
+							</select>
+						</div>
 						<button
 							onClick={resetGame}
 							className="w-full px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors">

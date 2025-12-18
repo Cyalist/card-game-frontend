@@ -58,20 +58,32 @@ const GameBoard: React.FC<GameBoardProps> = ({
 		}
 	};
 
-	const renderPlayerArea = (player: Player, position: "top" | "bottom" | "left" | "right") => {
+	const renderPlayerArea = (
+		player: Player,
+		position: "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right",
+	) => {
 		const isCurrentPlayer = player.id === currentPlayerId;
 		const positionClasses = {
 			top: "top-4 left-1/2 transform -translate-x-1/2",
 			bottom: "bottom-4 left-1/2 transform -translate-x-1/2",
 			left: "left-4 top-1/2 transform -translate-y-1/2",
 			right: "right-4 top-1/2 transform -translate-y-1/2",
+			"top-left": "top-12 left-12",
+			"top-right": "top-12 right-12",
+			"bottom-left": "bottom-12 left-12",
+			"bottom-right": "bottom-12 right-12",
 		};
 
-		const cardOrientation = position === "left" || position === "right" ? "vertical" : "horizontal";
+		const cardOrientation =
+			position === "left" || position === "right" || position === "top-left" || position === "top-right" || position === "bottom-left" || position === "bottom-right"
+				? "vertical"
+				: "horizontal";
 
 		return (
 			<div
-				className={`absolute ${positionClasses[position]} z-10 ${isCurrentPlayer ? "ring-2 ring-blue-500 ring-offset-2" : ""}`}
+				className={`absolute ${positionClasses[position]} z-10 ${
+					isCurrentPlayer ? "ring-2 ring-blue-500 ring-offset-2" : ""
+				}`}
 				onClick={() => onPlayerSelect?.(player.id)}>
 				{/* Player Info */}
 				<div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 mb-2 min-w-[120px]">
@@ -94,19 +106,26 @@ const GameBoard: React.FC<GameBoardProps> = ({
 				</div>
 
 				{/* Player's Cards */}
-				<div className={`flex ${cardOrientation === "vertical" ? "flex-col" : "flex-row"} gap-1`}>
+				<div
+					className={`flex ${
+						cardOrientation === "vertical" ? "flex-col" : "flex-row"
+					} gap-1`}>
 					{player.cards.map((card) => (
 						<PlayingCard
 							key={card.id}
 							suit={card.suit}
 							rank={card.rank}
-							faceDown={card.faceDown || player.id !== currentPlayerId}
+							faceDown={
+								card.faceDown || player.id !== currentPlayerId
+							}
 							className={
 								selectedCard === card.id && isCurrentPlayer
 									? "ring-2 ring-yellow-400 ring-offset-1"
 									: ""
 							}
-							onClick={() => handleCardClick(player.id, card.id, card)}
+							onClick={() =>
+								handleCardClick(player.id, card.id, card)
+							}
 						/>
 					))}
 				</div>
@@ -152,7 +171,9 @@ const GameBoard: React.FC<GameBoardProps> = ({
 						/>
 					) : (
 						<div className="relative w-16 h-24 border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center">
-							<div className="text-xs text-zinc-500 text-center">Empty</div>
+							<div className="text-xs text-zinc-500 text-center">
+								Empty
+							</div>
 						</div>
 					)}
 				</div>
@@ -192,16 +213,20 @@ const GameBoard: React.FC<GameBoardProps> = ({
 	};
 
 	return (
-		<div className={`relative w-full h-screen bg-green-800 dark:bg-green-900 overflow-hidden ${className}`}>
+		<div
+			className={`relative w-full h-screen bg-green-800 dark:bg-green-900 overflow-hidden ${className}`}>
 			{/* Table texture */}
 			<div className="absolute inset-0 bg-gradient-to-br from-green-700 via-green-800 to-green-900 opacity-50"></div>
 
 			{/* Table pattern */}
 			<div className="absolute inset-0 opacity-10">
-				<div className="h-full w-full" style={{
-					backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
-					backgroundSize: "20px 20px"
-				}}></div>
+				<div
+					className="h-full w-full"
+					style={{
+						backgroundImage:
+							"radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)",
+						backgroundSize: "20px 20px",
+					}}></div>
 			</div>
 
 			{/* Community Area */}
@@ -209,25 +234,142 @@ const GameBoard: React.FC<GameBoardProps> = ({
 
 			{/* Players positioned around the table */}
 			{players.map((player, index) => {
-				let position: "top" | "bottom" | "left" | "right";
+				let position: "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 				if (players.length === 1) {
 					position = "bottom";
 				} else if (players.length === 2) {
 					position = index === 0 ? "bottom" : "top";
 				} else if (players.length === 3) {
-					position = index === 0 ? "bottom" : index === 1 ? "left" : "right";
-				} else {
+					position =
+						index === 0 ? "bottom" : index === 1 ? "left" : "right";
+				} else if (players.length === 4) {
 					switch (index) {
-						case 0: position = "bottom"; break;
-						case 1: position = "left"; break;
-						case 2: position = "top"; break;
-						case 3: position = "right"; break;
-						default: position = "bottom"; break;
+						case 0:
+							position = "bottom";
+							break;
+						case 1:
+							position = "left";
+							break;
+						case 2:
+							position = "top";
+							break;
+						case 3:
+							position = "right";
+							break;
+						default:
+							position = "bottom";
+							break;
+					}
+				} else if (players.length === 5) {
+					switch (index) {
+						case 0:
+							position = "bottom";
+							break;
+						case 1:
+							position = "left";
+							break;
+						case 2:
+							position = "top";
+							break;
+						case 3:
+							position = "right";
+							break;
+						case 4:
+							position = "bottom-left";
+							break;
+						default:
+							position = "bottom";
+							break;
+					}
+				} else if (players.length === 6) {
+					switch (index) {
+						case 0:
+							position = "bottom";
+							break;
+						case 1:
+							position = "bottom-left";
+							break;
+						case 2:
+							position = "left";
+							break;
+						case 3:
+							position = "top";
+							break;
+						case 4:
+							position = "right";
+							break;
+						case 5:
+							position = "bottom-right";
+							break;
+						default:
+							position = "bottom";
+							break;
+					}
+				} else if (players.length === 7) {
+					switch (index) {
+						case 0:
+							position = "bottom";
+							break;
+						case 1:
+							position = "bottom-left";
+							break;
+						case 2:
+							position = "left";
+							break;
+						case 3:
+							position = "top-left";
+							break;
+						case 4:
+							position = "top";
+							break;
+						case 5:
+							position = "right";
+							break;
+						case 6:
+							position = "bottom-right";
+							break;
+						default:
+							position = "bottom";
+							break;
+					}
+				} else { // 8 players
+					switch (index) {
+						case 0:
+							position = "bottom";
+							break;
+						case 1:
+							position = "bottom-left";
+							break;
+						case 2:
+							position = "left";
+							break;
+						case 3:
+							position = "top-left";
+							break;
+						case 4:
+							position = "top";
+							break;
+						case 5:
+							position = "top-right";
+							break;
+						case 6:
+							position = "right";
+							break;
+						case 7:
+							position = "bottom-right";
+							break;
+						default:
+							position = "bottom";
+							break;
 					}
 				}
 
-				return renderPlayerArea(player, position);
+				return (
+					<div key={player.id}>
+						{renderPlayerArea(player, position)}
+					</div>
+				);
 			})}
 
 			{/* Deck */}
@@ -241,7 +383,14 @@ const GameBoard: React.FC<GameBoardProps> = ({
 					</div>
 					<div className="text-xs text-zinc-600 dark:text-zinc-400">
 						{currentPlayerId ? (
-							<span>Current: {players.find(p => p.id === currentPlayerId)?.name}</span>
+							<span>
+								Current:{" "}
+								{
+									players.find(
+										(p) => p.id === currentPlayerId,
+									)?.name
+								}
+							</span>
 						) : (
 							<span>Waiting to start...</span>
 						)}
